@@ -1,0 +1,30 @@
+version: 0.2
+
+phases:
+  install:
+    commands:
+      # Install kubectl
+      - curl -O https://s3.us-west-2.amazonaws.com/amazon-eks/1.27.1/2023-04-19/bin/linux/amd64/kubectl
+      - chmod +x ./kubectl
+      - mv ./kubectl /usr/local/bin/kubectl
+      # Update kubeconfig to talk to EKS
+      - aws eks update-kubeconfig --name olympus-cluster --region $AWS_DEFAULT_REGION
+      - aws sts get-caller-identity
+  pre_build:
+    commands:
+      - echo Logging in to ECR...
+      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
+      - REPOSITORY_URI=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/olympus-app
+  build:
+    commands:
+      - echo Building Docker image...
+      - cd olympus-global-logistics/app 
+      - docker build -t $REPOSITORY_URI:latest .
+  post_build:
+    commands:
+      - echo Pushing to ECR...
+      - docker push $REPOSITORY_URI:latest
+      - echo Deploying to EKS...
+      - cd .. 
+      # Force a restart of the deployment to pick up the new image
+      - kubectl rollout restart deployment/olympus-api
