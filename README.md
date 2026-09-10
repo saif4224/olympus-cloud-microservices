@@ -149,8 +149,8 @@ Kubernetes provides density and scale but comes with a base cost.
 
 1.  **Clone Repository:**
     ```bash
-    git clone [https://github.com/saif4224/AWS-Projects.git](https://github.com/saif4224/AWS-Projects.git)
-    cd AWS-Projects/olympus-global-logistics
+    git clone https://github.com/saif4224/olympus-cloud-microservices.git
+    cd olympus-cloud-microservices
     ```
 
 2.  **Provision Cluster (Infrastructure):**
